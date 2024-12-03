@@ -1,0 +1,68 @@
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '4.0.2'
+    id 'org.asciidoctor.jvm.pdf' version '4.0.2'
+    //id 'org.asciidoctor.jvm.gems' version '4.0.2'
+   
+}
+
+apply plugin: 'java'
+
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+    //ruby.gems()
+}
+
+dependencies {
+  //asciidoctorGems 'rubygems:rouge:3.15.0'
+}
+
+task createStructure {
+    doLast {
+        def dirs = [
+            'src/docs/asciidoc', 
+            'src/docs/asciidoc/images',
+            'src/diagrams', 
+            'src/docs/revealjs', 
+            'src/docs/revealjs/images',
+            'src/docs/revealjs/css',
+            'src/docs/revealjs/js', 
+            'src/main/kotlin',
+            'src/main/resources',
+            'src/test/kotlin',
+            'src/test/resources'
+            ]
+        dirs.each { dir ->
+            file(dir).mkdirs()
+        }
+
+        def file = file('src/docs/revealjs/css/custom.css')
+        def content = """.reveal pre { box-shadow: none; }"""
+        file.text = content
+    }
+}
+
+asciidoctorj {
+
+    modules {
+        diagram.use()
+        diagram.version '2.2.17'
+    }
+
+}
+
+asciidoctor {
+    baseDirFollowsSourceDir()
+    
+    attributes  'build-gradle': file('build-html.gradle'),
+                'source-highlighter': 'rouge',
+                'toc' : 'left',
+                'imagesdir': './images',
+                'icons': 'font',
+                'setanchors': '',
+                'idprefix': '',
+                'idseparator': '-',
+  			    'docinfo1': ''
+                
+}

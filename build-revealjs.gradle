@@ -1,0 +1,82 @@
+plugins {
+  id 'org.asciidoctor.jvm.gems' version '4.0.2'
+  id 'org.asciidoctor.jvm.revealjs' version '4.0.2'
+}
+
+apply plugin: 'java'
+
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+    ruby.gems()
+     maven { url 'https://jitpack.io' }
+}
+
+// configurations.all {
+//     resolutionStrategy.capabilitiesResolution.withCapability('com.burgstaller:okhttp-digest') {
+//         select('io.github.http-builder-ng:http-builder-ng-okhttp')
+//     }
+// }
+
+// configurations.all {
+//     resolutionStrategy.dependencySubstitution {
+//         substitute module('com.burgstaller:okhttp-digest') with module('io.github.rburgst:okhttp-digest:2.7')
+//     }
+// }
+
+dependencies {
+  asciidoctorGems 'rubygems:rouge:3.15.0'
+}
+
+revealjs {
+    version = '3.1.0'
+    templateGitHub {
+        organisation = 'hakimel'
+        repository = 'reveal.js'
+        tag = '3.9.1'
+    }
+}
+
+
+asciidoctorRevealJs {
+    sourceDir file('src/docs/revealjs')
+    outputDir file('build/docs/asciidoc')
+    baseDirFollowsSourceFile()
+
+    resources {
+        from("${sourceDir}/images") {
+            include '**'
+            into 'images'
+        }
+        from("${sourceDir}/css") {
+            include '**'
+            into 'css'
+        }
+    }
+
+    revealjsOptions { 
+        controls = true
+        transition = 'convex'    
+    }
+
+    attributes 'build-gradle': file('build-revealjs.gradle'),
+               'endpoint-url': 'http://example.org',
+               'source-highlighter': 'highlightjs',
+               'customcss': 'css/custom.css',
+               //'coderay-css': 'style',
+               'imagesdir': './images',
+               'toc': 'left',
+               'icons': 'font',
+               'setanchors': '',
+               'idprefix': 'slide-',
+               'idseparator': '-',
+               'docinfo': 'shared',
+               'revealjs_theme': 'league',
+               'revealjs_history': 'true',
+               'revealjs_slideNumber': 'true'
+}
+
+task asciidoctor(dependsOn: asciidoctorRevealJs)
+
+

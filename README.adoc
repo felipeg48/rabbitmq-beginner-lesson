@@ -1,0 +1,55 @@
+= RabbitMQ Beginner Lesson
+:icons: font
+
+== Development
+
+All is generated in the `build/docs/asciidoc` directory. The `index.html` file is the main entry point.
+You need to have the following tools installed:
+
+- Java 17
+- Python
+- NodeJS. You need to install mermaid-cli globally with `npm install -g mermaid.cli` to use the `[mermaid]` macro to generate diagrams.
+
+
+* Building the Docs
++
+[source,shell]
+----
+./gradlew asciidoctor -b build-html.gradle
+----
+
+* Building the Slides
++
+[source,shell]
+.Prepare the environment
+----
+cd src/docs/revealjs
+gem install bundler
+gem install asciidoctor-revealjs
+----
++
+[source,shell]
+.Build the slides
+----
+bundle exec asciidoctor-revealjs \
+  -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@4.1.2 \
+  -D ../../../build/docs/revealjs \
+rabbitmq-basics.adoc
+----
+
+* Building the project
++
+[source,shell]
+----
+./gradlew build 
+----
+* Running the project
++
+[source,shell]
+----
+./gradlew bootRun
+----
+
+There is a `run.sh` script that will build the docs, the slides and and it will run a server at port 8001.
+
+WARNING: The script uses the `livereloadx` command. You need to install it with `npm install -g livereloadx` to use it.

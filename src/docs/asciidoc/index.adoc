@@ -1,0 +1,226 @@
+= RabbitMQ - A Beginner Lesson
+:icons: font
+:source-code: ../..
+:extension: .html
+
+== Objectives:
+
+- Understand the basic concepts of RabbitMQ (messages, queues, producers, consumers).
+- Learn how to send and receive messages using Spring AMQP.
+- Create a simple producer and consumer application with Spring Boot.
+- Explore different message formats (text and JSON).
+
+== Prerequisites:
+- Basic knowledge of Java and Spring Boot.
+- Docker installed on your machine.
+- IDE (like IntelliJ IDEA or Eclipse).
+
+== Lab - RabbitMQ - A Beginner Lesson
+
+. Project Setup
++
+- Create a Spring Boot Project: Use Spring Initializr (https://start.spring.io/[^]) to create a new Spring Boot project.
+- Add the `Spring for RabbitMQ`, `Docker Compose Support` dependencies.
+- Generate the project, unzip and open it in your favorite IDE.
+- Add the Provided Code: Replace the contents of your pom.xml (for Maven) or build.gradle (for Gradle) with the necessary dependencies. Copy the provided `Producer`, `Consumer`, `DemoApplicationConfig`, `MyRequest` classes into your project.
+
+. Understand the Code
++
+* *Producer*: This class sends messages to RabbitMQ.
++
+[source,java]
+----
+package com.example.demo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Producer {
+    Logger log = LoggerFactory.getLogger(Producer.class);
+    private static final String DEFAULT_EXCHANGE = "";
+    private final RabbitTemplate rabbitTemplate;
+
+    public Producer(RabbitTemplate rabbitTemplate) {    // <1>
+        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitTemplate.setExchange(DEFAULT_EXCHANGE);
+    }
+
+    public void sendMessage(String queueOrRoutingKey, String message) {  // <2>
+        log.debug("Sending message: {}", message);
+        rabbitTemplate.convertAndSend(queueOrRoutingKey, message);
+    }
+
+    public void sendRequest(String queueOrRoutingKey, MyRequest myRequest) {  // <3>
+        log.debug("Sending a Request: {}", myRequest);
+        rabbitTemplate.convertAndSend(DEFAULT_EXCHANGE, queueOrRoutingKey, myRequest);
+    }
+}
+----
+<1> _Producer()_: Constructor that initializes the `RabbitTemplate` with the default exchange.
+<2> _sendMessage()_: Sends a text message.
+<3> _sendRequest()_: Sends a `JSON` message (using `MyRequest` object).
+
+* *Consumer*: This class receives messages from RabbitMQ.
++
+[source,java]
+----
+package com.example.demo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Consumer {
+    Logger log = LoggerFactory.getLogger(Consumer.class);
+
+    @RabbitListener(queues = "myQueue")                           // <1>
+    public void receiveMessage(String message) {
+        log.info("Received message: {}", message);
+    }
+
+    @RabbitListener(queuesToDeclare = @Queue("myRequest"))        // <2>
+    public void receiveRequestMessage(MyRequest myRequest) {
+        log.info("Received request: {}", myRequest);
+    }
+
+    @Configuration
+    static class ConsumerConfig {
+
+        @Bean
+        public MessageConverter messageConverter() {            // <3>
+            return new Jackson2JsonMessageConverter();
+        }
+    }
+}
+----
+<1> _receiveMessage()_: Receives text messages from the `myQueue` queue.
+<2> _receiveRequestMessage()_: Receives `JSON` messages from the `myRequest` queue.
+<3> _messageConverter()_: Configures the `Jackson2JsonMessageConverter` to convert `JSON` messages.
+
+* *DemoApplicationConfig*:
++
+[source,java]
+----
+package com.example.demo;
+
+import org.springframework.amqp.core.Queue;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+
+@Configuration
+public class DemoApplicationConfig {
+
+    private final Producer producer;
+
+    public DemoApplicationConfig(Producer producer) {
+        this.producer = producer;
+    }
+
+    @Bean
+    public Queue createMyQueue() {       // <1>
+        return new Queue("myQueue");
+    }
+
+    @EventListener(ApplicationReadyEvent.class)     // <2>
+    public void doSomethingAfterStartup() {
+        producer.sendMessage("myQueue", "Hello, world!");
+        producer.sendRequest("myRequest", new MyRequest("Hello, world!", 42, true));
+    }
+
+}
+----
+<1> Creates a queue named `myQueue`.
+<2> Sends a test message to `myQueue` and a test request to `myRequest` after the application starts.
+
+* *MyReqeust*:
++
+[source,java]
+----
+package com.example.demo;
+
+public class MyRequest {
+    private String message;
+    private int intValue;
+    private boolean booleanValue;
+
+    public MyRequest() {
+    }
+
+    public MyRequest(String message, int intValue, boolean booleanValue) {
+        this.message = message;
+        this.intValue = intValue;
+        this.booleanValue = booleanValue;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public int getIntValue() {
+        return intValue;
+    }
+
+    public void setIntValue(int intValue) {
+        this.intValue = intValue;
+    }
+
+    public boolean isBooleanValue() {
+        return booleanValue;
+    }
+
+    public void setBooleanValue(boolean booleanValue) {
+        this.booleanValue = booleanValue;
+    }
+
+    @Override
+    public String toString() {
+        return "MyRequest{" +
+                "message='" + message + '\'' +
+                ", intValue=" + intValue +
+                ", booleanValue=" + booleanValue +
+                '}';
+    }
+}
+----
++
+Just a simple POJO class to represent a request object.
+
+. Run the Application
++
+- Start your RabbitMQ server.
+- Run your Spring Boot application.
+- Observe the logs in your application console. You should see messages being sent and received.
+
+. Explore RabbitMQ Management Interface
++
+- Access the RabbitMQ management interface (usually at http://localhost:15672/).
+- Explore the "Queues" section to see the "myQueue" and "myRequest" queues.
+- Examine the messages in the queues.
+
+==  Experiment
+
+- Modify Messages: Change the messages being sent by the producer.
+- Add More Consumers: Create another consumer that listens to the same queue.
+- Explore Different Message Types: Try sending different types of objects as messages (e.g., custom classes).
+
+==  (Optional) CHALLENGE!! Advanced Exercises
+
+- Implement Publisher Confirms: Add publisher confirms to the producer to ensure message delivery.
+- Use Different Exchanges: Explore using different exchange types (fanout, topic, headers) to route messages.
+- Error Handling: Implement error handling in the consumer to handle message processing failures.

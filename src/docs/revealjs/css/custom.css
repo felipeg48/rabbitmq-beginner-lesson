@@ -1,0 +1,31 @@
+.reveal pre { 
+    box-shadow: none; 
+    text-align: center;
+}
+
+.reveal section img {
+    border: none;
+    box-shadow: none;
+}
+
+.reveal table {
+    border-color: white;
+}
+
+.col2 {
+    width:48% !important;
+    margin: 0 1% !important;
+    float:left;
+  }
+  
+.reveal .col2 ol, .reveal .col2  dl, .reveal .col2  ul {
+      display:table;
+}
+
+.reveal .hljs {
+    background: #3f3f3f00;
+    display: inline-block;
+    text-align: left;
+    /* font-size: 1.8em;
+    line-height: 1.5em;  */
+}

@@ -1,0 +1,135 @@
+= RabbitMQ - Basics
+:revealjs_center: true
+:extension: .html
+:source-highlighter: highlight.js
+
+== Agenda
+
+[.stretch]
+[%step]
+* Introduction / Basics
+* Exchanges, Bindings, and QueuesDemo
+* Spring AMQP / Producer / Consumer
+* Demo / Lab
+
+
+== Introduction
+
+[.stretch]
+[%step]
+* AMQP Developed by JPMorgan Chase in London.
+* Wire-Level Protocol
+* Message Oriented Middleware / Asyngchronous messaging
+* Data Serialization
+* Routing Capabilities
+* API
+
+== Basics -  RabbitMQ
+
+[.stretch]
+[%step]
+* Message Broker / Based on Erlang
+* Implementation AMQP - Advanced Message Queuing Protocol
+* Extendend Routing Capabilities
+* Platform Independent
+* Scalable, Clustering, High Availability
+
+== Basics - RabbitMQ (cont.)
+
+[.stretch]
+[%step]
+* Open Source
+* Exchanges / Bindings / Queues
+* Plugins: Management, Shovel, Federation
+* Languages: Java, Python, Ruby, .NET, etc.
+* Clients: Spring AMQP, Pika, RabbitMQ Java Client, etc.
+
+== Exchanges, Bindings, and Queues
+
+[.stretch]
+[%step]
+* Exchanges
+** Direct
+** Fanout
+** Topic
+** Headers
+* Bindings  (Routing Keys)
+* Queues
+
+== Demo
+
+== Spring AMQP
+
+[.stretch]
+[%step]
+* Spring AMQP
+** RabbitTemplate
+** RabbitListener
+** MessageConverter
+** MessageListenerAdapter
+** RabbitAdmin
+
+== Spring AMQP (cont.)
+
+[.stretch]
+[%step]
+* Spring / Spring Boot
+* Spring Cloud Stream
+* Spring Integration
+* Sprtng Cloud Data Flow
+
+
+== Producer
+
+=== Using RabbitTemplate
+
+[.stretch]
+[source,java,linenums]
+----
+public class Producer {
+    private static final String DEFAULT_EXCHANGE = "";
+    private final RabbitTemplate rabbitTemplate;
+
+    public Producer(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitTemplate.setExchange(DEFAULT_EXCHANGE);
+    }
+
+    public void sendMessage(String queueOrRoutingKey, 
+                            String message) {
+        rabbitTemplate
+            .convertAndSend(queueOrRoutingKey, message);
+    }
+}
+----
+
+== Consumer
+
+=== Using RabbitListener
+
+[.stretch]
+[source,java,linenums]
+----
+@Component
+public class Consumer {
+    
+    @RabbitListener(queues = "myQueue")
+    public void receiveMessage(String message) {
+        // Process message
+    }
+
+}
+----
+
+== Demo
+
+== Lab
+
+== Summary
+
+[.stretch]
+[%step]
+* Introduction
+* Basics / Exchanges, Bindings, and Queues
+* Spring AMQP - RabbitTemplate / RabbitListener 
+* Demo / Lab
